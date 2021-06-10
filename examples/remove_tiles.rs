@@ -70,7 +70,7 @@ fn remove_tiles(
                 let _ = map_query.despawn_tile(&mut commands, position, 0u16, 0u16);
             }
 
-            map_query.notify_chunk_for_tile(position, 0u16, 0u16);
+            map_query.notify_chunk_for_tile(&mut commands, position, 0u16, 0u16);
 
             last_update.value = current_time;
         }
