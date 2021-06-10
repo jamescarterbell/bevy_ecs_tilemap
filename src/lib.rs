@@ -76,7 +76,7 @@ mod ldtk;
 #[cfg(feature = "tiled_map")]
 mod tiled;
 
-pub use crate::chunk::{Chunk, ChunkSettings};
+pub use crate::chunk::{Chunk, ChunkSettings, NeedsRemesh};
 pub use crate::layer::{Layer, LayerBundle, LayerSettings, MapTileError};
 pub use crate::layer_builder::LayerBuilder;
 pub use crate::map::Map;

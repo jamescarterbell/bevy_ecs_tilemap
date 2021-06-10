@@ -69,7 +69,7 @@ fn build_map(map_query: &mut MapQuery, commands: &mut Commands) {
             0u16,
             0u16,
         );
-        map_query.notify_chunk_for_tile(position, 0u16, 0u16);
+        map_query.notify_chunk_for_tile(commands, position, 0u16, 0u16);
     }
 }
 

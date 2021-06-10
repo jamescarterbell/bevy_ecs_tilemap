@@ -14,7 +14,7 @@ use bevy::{
     },
     tasks::AsyncComputeTaskPool,
 };
-use std::sync::Mutex;
+use std::sync::mpsc::channel;
 
 #[derive(Bundle)]
 pub(crate) struct ChunkBundle {
@@ -22,7 +22,6 @@ pub(crate) struct ChunkBundle {
     pub main_pass: MainPass,
     pub material: Handle<ColorMaterial>,
     pub render_pipeline: RenderPipelines,
-    pub visible: Visible,
     pub draw: Draw,
     pub mesh: Handle<Mesh>,
     pub transform: Transform,
@@ -34,10 +33,6 @@ impl Default for ChunkBundle {
     fn default() -> Self {
         Self {
             chunk: Chunk::default(),
-            visible: Visible {
-                is_transparent: true,
-                ..Default::default()
-            },
             draw: Draw::default(),
             main_pass: MainPass,
             mesh: Handle::default(),
@@ -79,7 +74,6 @@ pub struct Chunk {
     /// Chunk specific settings.
     pub settings: ChunkSettings,
     /// Tells internal systems that this chunk should be remeshed(send new data to the GPU)
-    pub needs_remesh: bool,
     pub(crate) tiles: Vec<Option<Entity>>,
 }
 
@@ -87,7 +81,6 @@ impl Clone for Chunk {
     fn clone(&self) -> Chunk {
         Chunk {
             map_entity: self.map_entity,
-            needs_remesh: self.needs_remesh,
             settings: self.settings.clone(),
             tiles: self.tiles.clone(),
         }
@@ -98,7 +91,6 @@ impl Default for Chunk {
     fn default() -> Self {
         Self {
             map_entity: Entity::new(0),
-            needs_remesh: true,
             settings: ChunkSettings {
                 position: Default::default(),
                 size: Default::default(),
@@ -148,7 +140,6 @@ impl Chunk {
         };
         Self {
             map_entity,
-            needs_remesh: true,
             settings,
             tiles,
         }
@@ -198,38 +189,54 @@ impl Chunk {
     }
 }
 
+/// A marker component on chunks to tell internal systems to remesh this chunk.
+pub struct NeedsRemesh;
+
 pub(crate) fn update_chunk_mesh(
+    mut commands: Commands,
     task_pool: Res<AsyncComputeTaskPool>,
-    meshes: ResMut<Assets<Mesh>>,
+    mut meshes: ResMut<Assets<Mesh>>,
     tile_query: Query<(&UVec2, &Tile, Option<&GPUAnimated>)>,
-    mut changed_chunks: Query<(&mut Chunk, &Visible), Or<(Changed<Visible>, Changed<Chunk>)>>,
+    mut changed_chunks: Query<(&Chunk, &NeedsRemesh, Entity)>,
 ) {
-    let threaded_meshes = Mutex::new(meshes);
+    let (meshed_s, meshed_r) = channel();
 
-    changed_chunks.par_for_each_mut(&task_pool, 5, |(mut chunk, visible)| {
-        if visible.is_visible && chunk.needs_remesh {
-            log::trace!(
-                "Re-meshing chunk at: {:?} layer id of: {}",
-                chunk.settings.position,
-                chunk.settings.layer_id
-            );
+    let changed_chunks = &changed_chunks;
+    let tile_query = &tile_query;
 
-            let mut meshes = threaded_meshes.lock().unwrap();
-            chunk.settings.mesher.mesh(
-                chunk.settings.clone(),
-                &chunk.tiles,
-                &tile_query,
-                &mut meshes,
-            );
-
-            chunk.needs_remesh = false;
+    task_pool.scope(move |scope| {
+        for (chunk, _, entity) in changed_chunks.iter(){
+            let meshed_send = meshed_s.clone();
+            scope.spawn(async move{
+                log::trace!(
+                    "Re-meshing chunk at: {:?} layer id of: {}",
+                    chunk.settings.position,
+                    chunk.settings.layer_id
+                );
+            
+                let mesh = chunk.settings.mesher.mesh(
+                    &chunk.settings,
+                    &chunk.tiles,
+                    tile_query,
+                );
+                meshed_send.send((chunk, entity, mesh));
+            });
         }
+        scope.spawn(async move{
+            for (chunk, entity, mesh) in meshed_r.iter(){
+                commands
+                    .entity(entity)
+                    .remove::<NeedsRemesh>();
+                *meshes.get_mut(chunk.settings.mesh_handle.clone()).unwrap() = mesh;
+            }
+        });
     });
 }
 
 pub(crate) fn update_chunk_visibility(
+    mut commands: Commands,
     camera: Query<(&Camera, &OrthographicProjection, &Transform)>,
-    mut chunks: Query<(&GlobalTransform, &Chunk, &mut Visible)>,
+    mut chunks: Query<(&GlobalTransform, &Chunk, Entity, Option<&Visible>)>,
 ) {
     if let Some((_current_camera, ortho, camera_transform)) = camera.iter().find(|data| {
         if let Some(name) = &data.0.name {
@@ -246,7 +253,7 @@ pub(crate) fn update_chunk_visibility(
 
         let camera_bounds = Vec4::new(left, right, bottom, top);
 
-        for (global_transform, chunk, mut visible) in chunks.iter_mut() {
+        for (global_transform, chunk, entity, visible) in chunks.iter_mut() {
             if chunk.settings.mesh_type != TilemapMeshType::Square || !chunk.settings.cull {
                 continue;
             }
@@ -272,26 +279,30 @@ pub(crate) fn update_chunk_visibility(
 
             if (bounds.x >= padded_camera_bounds.x) && (bounds.y <= padded_camera_bounds.y) {
                 if (bounds.z < padded_camera_bounds.z) || (bounds.w > padded_camera_bounds.w) {
-                    if visible.is_visible {
                         log::trace!("Hiding chunk @: {:?}", bounds);
-                        visible.is_visible = false;
-                    }
+                        commands
+                            .entity(entity.clone())
+                            .remove::<Visible>()
+                            .remove::<NeedsRemesh>();
                 } else {
-                    if !visible.is_visible {
-                        log::trace!("Showing chunk @: {:?}", bounds);
-                        visible.is_visible = true;
+                    log::trace!("Showing chunk @: {:?}", bounds);
+                    if let None = visible{
+                        commands
+                            .entity(entity.clone())
+                            .insert_bundle((Visible{is_visible: true, is_transparent: false}, NeedsRemesh));
                     }
                 }
             } else {
-                if visible.is_visible {
-                    log::trace!(
-                        "Hiding chunk @: {:?}, with camera_bounds: {:?}, bounds_size: {:?}",
-                        bounds,
-                        padded_camera_bounds,
-                        bounds_size
-                    );
-                    visible.is_visible = false;
-                }
+                log::trace!(
+                    "Hiding chunk @: {:?}, with camera_bounds: {:?}, bounds_size: {:?}",
+                    bounds,
+                    padded_camera_bounds,
+                    bounds_size
+                );
+                commands
+                    .entity(entity.clone())
+                    .remove::<Visible>()
+                    .remove::<NeedsRemesh>();
             }
         }
     }

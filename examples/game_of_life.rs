@@ -111,13 +111,13 @@ fn update(
                         visible: true,
                         ..*tile
                     });
-                    map_query.notify_chunk_for_tile(*pos, 0u16, 0u16);
+                    map_query.notify_chunk_for_tile(&mut commands, *pos, 0u16, 0u16);
                 } else if !is_alive && was_alive {
                     commands.entity(entity).insert(Tile {
                         visible: false,
                         ..*tile
                     });
-                    map_query.notify_chunk_for_tile(*pos, 0u16, 0u16);
+                    map_query.notify_chunk_for_tile(&mut commands, *pos, 0u16, 0u16);
                 }
             }
 
@@ -128,7 +128,7 @@ fn update(
 
 fn main() {
     env_logger::Builder::from_default_env()
-        .filter_level(log::LevelFilter::Error)
+        .filter_level(log::LevelFilter::Off)
         .init();
 
     App::build()

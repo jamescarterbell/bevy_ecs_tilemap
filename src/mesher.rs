@@ -4,6 +4,7 @@ use crate::{chunk::ChunkSettings, prelude::*, tile::GPUAnimated};
 use bevy::{
     prelude::*,
     render::mesh::{Indices, VertexAttributeValues},
+    render::pipeline::PrimitiveTopology,
 };
 
 #[derive(Debug, Default, Clone, Copy)]
@@ -12,12 +13,11 @@ pub(crate) struct ChunkMesher;
 impl ChunkMesher {
     pub fn mesh(
         &self,
-        chunk: ChunkSettings,
+        chunk: &ChunkSettings,
         chunk_tiles: &Vec<Option<Entity>>,
         tile_query: &Query<(&UVec2, &Tile, Option<&GPUAnimated>)>,
-        meshes: &mut ResMut<Assets<Mesh>>,
-    ) {
-        let mesh = meshes.get_mut(chunk.mesh_handle).unwrap();
+    ) -> Mesh {
+        let mut mesh = Mesh::new(PrimitiveTopology::TriangleList);
         let size = ((chunk.size.x * chunk.size.y) * 4) as usize;
         let mut positions: Vec<[f32; 3]> = Vec::with_capacity(size);
         let mut textures: Vec<[i32; 4]> = Vec::with_capacity(size);
@@ -103,5 +103,6 @@ impl ChunkMesher {
         mesh.set_attribute("Vertex_Position", VertexAttributeValues::Float3(positions));
         mesh.set_attribute("Vertex_Texture", VertexAttributeValues::Int4(textures));
         mesh.set_indices(Some(Indices::U32(indices)));
+        mesh
     }
 }

@@ -58,6 +58,7 @@ fn startup(
 }
 
 fn remove_tiles(
+    mut commands: Commands,
     time: Res<Time>,
     mut last_update_query: Query<&mut LastUpdate>,
     mut tile_query: Query<&mut Tile>,
@@ -81,7 +82,7 @@ fn remove_tiles(
                 }
             }
 
-            map_query.notify_chunk_for_tile(position, 0u16, 0u16);
+            map_query.notify_chunk_for_tile(&mut commands, position, 0u16, 0u16);
 
             last_update.value = current_time;
         }

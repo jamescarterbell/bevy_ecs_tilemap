@@ -111,6 +111,7 @@ fn startup(
 // Should run after the commands from startup have been processed.
 // An example of how to manipulate tiles.
 fn update_map(
+    mut commands: Commands,
     time: Res<Time>,
     mut extra_data_query: Query<(&mut CurrentColor, &mut LastUpdate)>,
     mut tile_query: Query<&mut Tile>,
@@ -140,7 +141,7 @@ fn update_map(
                                 };
                                 // Finally after mutating the tile we can tell the internal systems to "remesh" the tilemap.
                                 // This sends the new tile data to the gpu.
-                                map_query.notify_chunk_for_tile(pos.as_u32(), 0u16, 0u16);
+                                map_query.notify_chunk_for_tile(&mut commands, pos.as_u32(), 0u16, 0u16);
                             }
                         }
                     }

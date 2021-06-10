@@ -2,6 +2,7 @@ use crate::map::Map;
 use crate::{morton_index, prelude::*};
 use bevy::ecs::system::SystemParam;
 use bevy::prelude::*;
+use crate::chunk::NeedsRemesh;
 
 /// MapQuery is a useful bevy system param that provides a standard API for interacting with tiles.
 /// It's not required that you use this, but it does provide a convenience.
@@ -402,15 +403,18 @@ impl<'a> MapQuery<'a> {
     }
 
     /// Let's the internal systems know to "remesh" the chunk.
-    pub fn notify_chunk(&mut self, chunk_entity: Entity) {
+    pub fn notify_chunk(&mut self, commands: &mut Commands, chunk_entity: Entity) {
         if let Ok((_, mut chunk)) = self.chunk_query_set.q0_mut().get_mut(chunk_entity) {
-            chunk.needs_remesh = true;
+            commands
+                .entity(chunk_entity)
+                .insert(NeedsRemesh);
         }
     }
 
     /// Let's the internal systems know to remesh the chunk for a given tile pos and layer_id.
     pub fn notify_chunk_for_tile<M: Into<u16>, L: Into<u16>>(
         &mut self,
+        commands: &mut Commands,
         tile_pos: UVec2,
         map_id: M,
         layer_id: L,
@@ -433,7 +437,9 @@ impl<'a> MapQuery<'a> {
                         if let Ok((_, mut chunk)) =
                             self.chunk_query_set.q0_mut().get_mut(chunk_entity)
                         {
-                            chunk.needs_remesh = true;
+                            commands
+                                .entity(chunk_entity)
+                                .insert(NeedsRemesh);
                         }
                     }
                 }

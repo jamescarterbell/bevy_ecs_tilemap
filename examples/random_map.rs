@@ -5,6 +5,7 @@ use bevy::{
     prelude::*,
 };
 use bevy_ecs_tilemap::prelude::*;
+use bevy_ecs_tilemap::NeedsRemesh;
 use rand::{thread_rng, Rng};
 
 mod helpers;
@@ -67,6 +68,7 @@ struct LastUpdate {
 // In this example it's better not to use the default `MapQuery` SystemParam as
 // it's faster to do it this way:
 fn random(
+    mut commands: Commands,
     time: ResMut<Time>,
     mut query: Query<(&mut Tile, &TileParent, &mut LastUpdate)>,
     mut chunk_query: Query<&mut Chunk>,
@@ -84,7 +86,9 @@ fn random(
 
     for chunk_entity in chunks.drain() {
         if let Ok(mut chunk) = chunk_query.get_mut(chunk_entity) {
-            chunk.needs_remesh = true;
+            commands
+                .entity(chunk_entity)
+                .insert(NeedsRemesh);
         }
     }
 }
