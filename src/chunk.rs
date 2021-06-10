@@ -197,7 +197,7 @@ pub(crate) fn update_chunk_mesh(
     task_pool: Res<AsyncComputeTaskPool>,
     mut meshes: ResMut<Assets<Mesh>>,
     tile_query: Query<(&UVec2, &Tile, Option<&GPUAnimated>)>,
-    mut changed_chunks: Query<(&Chunk, &NeedsRemesh, Entity)>,
+    changed_chunks: Query<(&Chunk, &NeedsRemesh, &Visible, Entity)>,
 ) {
     let (meshed_s, meshed_r) = channel();
 
@@ -205,7 +205,7 @@ pub(crate) fn update_chunk_mesh(
     let tile_query = &tile_query;
 
     task_pool.scope(move |scope| {
-        for (chunk, _, entity) in changed_chunks.iter(){
+        for (chunk, _, _, entity) in changed_chunks.iter(){
             let meshed_send = meshed_s.clone();
             scope.spawn(async move{
                 log::trace!(
