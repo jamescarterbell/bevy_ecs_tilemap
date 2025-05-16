@@ -142,85 +142,95 @@ impl Plugin for TilemapRenderingPlugin {
         load_internal_asset!(
             app,
             COLUMN_EVEN_HEX,
-            "shaders/column_even_hex.wgsl",
+            "render/shaders/column_even_hex.wgsl",
             Shader::from_wgsl
         );
 
         load_internal_asset!(
             app,
             COLUMN_HEX,
-            "shaders/column_hex.wgsl",
+            "render/shaders/column_hex.wgsl",
             Shader::from_wgsl
         );
 
         load_internal_asset!(
             app,
             COLUMN_ODD_HEX,
-            "shaders/column_odd_hex.wgsl",
+            "render/shaders/column_odd_hex.wgsl",
             Shader::from_wgsl
         );
 
-        load_internal_asset!(app, COMMON, "shaders/common.wgsl", Shader::from_wgsl);
+        load_internal_asset!(app, COMMON, "render/shaders/common.wgsl", Shader::from_wgsl);
 
         load_internal_asset!(
             app,
             DIAMOND_ISO,
-            "shaders/diamond_iso.wgsl",
+            "render/shaders/diamond_iso.wgsl",
             Shader::from_wgsl
         );
 
         load_internal_asset!(
             app,
             ROW_EVEN_HEX,
-            "shaders/row_even_hex.wgsl",
+            "render/shaders/row_even_hex.wgsl",
             Shader::from_wgsl
         );
 
-        load_internal_asset!(app, ROW_HEX, "shaders/row_hex.wgsl", Shader::from_wgsl);
+        load_internal_asset!(
+            app,
+            ROW_HEX,
+            "render/shaders/row_hex.wgsl",
+            Shader::from_wgsl
+        );
 
         load_internal_asset!(
             app,
             ROW_ODD_HEX,
-            "shaders/row_odd_hex.wgsl",
+            "render/shaders/row_odd_hex.wgsl",
             Shader::from_wgsl
         );
 
-        load_internal_asset!(app, ROW_HEX, "shaders/row_hex.wgsl", Shader::from_wgsl);
+        load_internal_asset!(
+            app,
+            ROW_HEX,
+            "render/shaders/row_hex.wgsl",
+            Shader::from_wgsl
+        );
 
         load_internal_asset!(
             app,
             MESH_OUTPUT,
-            "shaders/mesh_output.wgsl",
+            "render/shaders/mesh_output.wgsl",
             Shader::from_wgsl
         );
 
-        load_internal_asset!(app, SQUARE, "shaders/square.wgsl", Shader::from_wgsl);
+        load_internal_asset!(app, SQUARE, "render/shaders/square.wgsl", Shader::from_wgsl);
 
         load_internal_asset!(
             app,
             STAGGERED_ISO,
-            "shaders/staggered_iso.wgsl",
+            "render/shaders/staggered_iso.wgsl",
             Shader::from_wgsl
         );
 
         load_internal_asset!(
             app,
             TILEMAP_VERTEX_OUTPUT,
-            "shaders/tilemap_vertex_output.wgsl",
+            "render/shaders/tilemap_vertex_output.wgsl",
             Shader::from_wgsl
         );
 
         load_internal_asset!(
             app,
             TILEMAP_SHADER_VERTEX,
-            "shaders/tilemap_vertex.wgsl",
+            "render/shaders/tilemap_vertex.wgsl",
             Shader::from_wgsl
         );
 
         load_internal_asset!(
             app,
             TILEMAP_SHADER_FRAGMENT,
-            "shaders/tilemap_fragment.wgsl",
+            "render/shaders/tilemap_fragment.wgsl",
             Shader::from_wgsl
         );
 
