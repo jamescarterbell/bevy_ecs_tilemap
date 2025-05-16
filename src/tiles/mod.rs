@@ -1,11 +1,11 @@
-mod storage;
+mod chunk;
 
 use bevy::{
     math::{UVec2, Vec2},
     prelude::{Bundle, Color, Component, Reflect, ReflectComponent},
     render::sync_world::SyncToRenderWorld,
 };
-pub use storage::*;
+pub use chunk::*;
 
 use crate::TilemapSize;
 use crate::map::TilemapId;

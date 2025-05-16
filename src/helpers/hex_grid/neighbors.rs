@@ -2,7 +2,7 @@ use crate::TilePos;
 use crate::helpers::hex_grid::axial::AxialPos;
 use crate::helpers::hex_grid::offset::{ColEvenPos, ColOddPos, RowEvenPos, RowOddPos};
 use crate::map::{HexCoordSystem, TilemapSize};
-use crate::prelude::TileStorage;
+use crate::prelude::ChunkStorage;
 use bevy::prelude::Entity;
 use std::ops::{Add, Sub};
 
@@ -529,8 +529,8 @@ impl HexNeighbors<TilePos> {
 
     /// Returns the entities associated with each tile position.
     #[inline]
-    pub fn entities(&self, tile_storage: &TileStorage) -> HexNeighbors<Entity> {
-        let f = |tile_pos| tile_storage.get(tile_pos);
+    pub fn entities(&self, tile_storage: &ChunkStorage<Entity>) -> HexNeighbors<Entity> {
+        let f = |tile_pos| tile_storage.get(tile_pos).cloned();
         self.and_then_ref(f)
     }
 }

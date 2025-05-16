@@ -1,7 +1,7 @@
 use crate::helpers::square_grid::SquarePos;
 use crate::helpers::square_grid::staggered::StaggeredPos;
 use crate::map::TilemapSize;
-use crate::prelude::{TilePos, TileStorage};
+use crate::prelude::{ChunkStorage, TilePos};
 use bevy::prelude::Entity;
 use std::ops::{Add, Sub};
 
@@ -394,8 +394,8 @@ impl Neighbors<TilePos> {
     }
 
     /// Returns the entities associated with each tile position.
-    pub fn entities(&self, tile_storage: &TileStorage) -> Neighbors<Entity> {
-        let f = |tile_pos| tile_storage.get(tile_pos);
+    pub fn entities(&self, tile_storage: &ChunkStorage<Entity>) -> Neighbors<Entity> {
+        let f = |tile_pos| tile_storage.get(tile_pos).cloned();
         self.and_then_ref(f)
     }
 }

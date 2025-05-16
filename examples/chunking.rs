@@ -15,7 +15,7 @@ const RENDER_CHUNK_SIZE: UVec2 = UVec2 {
 
 fn spawn_chunk(commands: &mut Commands, asset_server: &AssetServer, chunk_pos: IVec2) {
     let tilemap_entity = commands.spawn_empty().id();
-    let mut tile_storage = TileStorage::empty(CHUNK_SIZE.into());
+    let mut tile_storage = ChunkStorage::empty(CHUNK_SIZE.into());
     // Spawn the elements of the tilemap.
     for x in 0..CHUNK_SIZE.x {
         for y in 0..CHUNK_SIZE.y {

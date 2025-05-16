@@ -47,7 +47,7 @@ fn spawn_tilemap(mut commands: Commands, tile_handle_hex_row: Res<TileHandleHexR
         y: MAP_SIDE_LENGTH_Y,
     };
 
-    let mut tile_storage = TileStorage::empty(map_size);
+    let mut tile_storage = ChunkStorage::empty(map_size);
     let tilemap_entity = commands.spawn_empty().id();
     let tilemap_id = TilemapId(tilemap_entity);
 
@@ -87,7 +87,7 @@ fn spawn_tile_labels(
         &TilemapSize,
         &TilemapGridSize,
         &TilemapTileSize,
-        &TileStorage,
+        &ChunkStorage<Entity>,
         &TilemapAnchor,
     )>,
     tile_q: Query<&mut TilePos>,
@@ -271,7 +271,7 @@ fn hover_highlight_tile_label(
         &TilemapGridSize,
         &TilemapTileSize,
         &TilemapType,
-        &TileStorage,
+        &ChunkStorage<Entity>,
         &Transform,
         &TilemapAnchor,
     )>,
@@ -313,10 +313,10 @@ fn hover_highlight_tile_label(
         ) {
             // Highlight the relevant tile's label
             if let Some(tile_entity) = tile_storage.get(&tile_pos) {
-                if let Ok(label) = tile_label_q.get(tile_entity) {
+                if let Ok(label) = tile_label_q.get(*tile_entity) {
                     if let Ok(mut text_color) = text_q.get_mut(label.0) {
                         text_color.0 = palettes::tailwind::RED_600.into();
-                        commands.entity(tile_entity).insert(Hovered);
+                        commands.entity(*tile_entity).insert(Hovered);
                     }
                 }
             }
@@ -331,7 +331,7 @@ struct NeighborHighlight;
 #[allow(clippy::too_many_arguments)]
 fn highlight_neighbor_label(
     mut commands: Commands,
-    tilemap_query: Query<(&TilemapType, &TilemapSize, &TileStorage)>,
+    tilemap_query: Query<(&TilemapType, &TilemapSize, &ChunkStorage<Entity>)>,
     keyboard_input: Res<ButtonInput<KeyCode>>,
     highlighted_tiles_q: Query<Entity, With<NeighborHighlight>>,
     hovered_tiles_q: Query<&TilePos, With<Hovered>>,
@@ -364,11 +364,11 @@ fn highlight_neighbor_label(
             for neighbor_pos in neighboring_positions.iter() {
                 // We want to ensure that the tile position lies within the tile map, so we do a
                 // `checked_get`.
-                if let Some(tile_entity) = tile_storage.checked_get(neighbor_pos) {
-                    if let Ok(label) = tile_label_q.get(tile_entity) {
+                if let Ok(Some(tile_entity)) = tile_storage.try_get(neighbor_pos) {
+                    if let Ok(label) = tile_label_q.get(*tile_entity) {
                         if let Ok(mut text_color) = text_q.get_mut(label.0) {
                             text_color.0 = palettes::tailwind::BLUE_600.into();
-                            commands.entity(tile_entity).insert(NeighborHighlight);
+                            commands.entity(*tile_entity).insert(NeighborHighlight);
                         }
                     }
                 }
@@ -403,11 +403,11 @@ fn highlight_neighbor_label(
 
                 // We want to ensure that the tile position lies within the tile map, so we do a
                 // `checked_get`.
-                if let Some(tile_entity) = tile_storage.checked_get(&tile_pos) {
-                    if let Ok(label) = tile_label_q.get(tile_entity) {
+                if let Ok(Some(tile_entity)) = tile_storage.try_get(&tile_pos) {
+                    if let Ok(label) = tile_label_q.get(*tile_entity) {
                         if let Ok(mut text_color) = text_q.get_mut(label.0) {
                             text_color.0 = palettes::tailwind::GREEN_600.into();
-                            commands.entity(tile_entity).insert(NeighborHighlight);
+                            commands.entity(*tile_entity).insert(NeighborHighlight);
                         }
                     }
                 }

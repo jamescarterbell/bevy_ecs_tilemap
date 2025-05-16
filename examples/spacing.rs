@@ -10,7 +10,7 @@ fn startup(mut commands: Commands, asset_server: Res<AssetServer>) {
     let map_size = TilemapSize { x: 32, y: 32 };
 
     // Layer 1
-    let mut tile_storage = TileStorage::empty(map_size);
+    let mut tile_storage = ChunkStorage::empty(map_size);
     let tilemap_entity = commands.spawn_empty().id();
 
     fill_tilemap(
@@ -38,7 +38,7 @@ fn startup(mut commands: Commands, asset_server: Res<AssetServer>) {
     });
 
     // Layer 2
-    let mut tile_storage = TileStorage::empty(map_size);
+    let mut tile_storage = ChunkStorage::empty(map_size);
     let tilemap_entity = commands.spawn_empty().id();
 
     fill_tilemap(

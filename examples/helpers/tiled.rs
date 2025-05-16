@@ -203,7 +203,7 @@ pub fn process_loaded_maps(
     mut commands: Commands,
     mut map_events: EventReader<AssetEvent<TiledMap>>,
     maps: Res<Assets<TiledMap>>,
-    tile_storage_query: Query<(Entity, &TileStorage)>,
+    tile_storage_query: Query<(Entity, &ChunkStorage<Entity>)>,
     mut map_query: Query<(
         &TiledMapHandle,
         &mut TiledLayersStorage,
@@ -320,7 +320,7 @@ pub fn process_loaded_maps(
                             tiled::Orientation::Orthogonal => TilemapType::Square,
                         };
 
-                        let mut tile_storage = TileStorage::empty(map_size);
+                        let mut tile_storage = ChunkStorage::empty(map_size);
                         let layer_entity = commands.spawn_empty().id();
 
                         for x in 0..map_size.x {

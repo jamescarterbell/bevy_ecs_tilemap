@@ -4,7 +4,7 @@ use bevy::{
 };
 use bevy_ecs_tilemap::TilemapPlugin;
 use bevy_ecs_tilemap::prelude::*;
-use bevy_ecs_tilemap::tiles::{AnimatedTile, TileBundle, TilePos, TileStorage, TileTextureIndex};
+use bevy_ecs_tilemap::tiles::{AnimatedTile, TileBundle, TilePos, ChunkStorage, TileTextureIndex};
 use rand::seq::IteratorRandom;
 use rand::thread_rng;
 
@@ -41,7 +41,7 @@ fn create_background(mut commands: Commands, asset_server: Res<AssetServer>) {
         tile_size,
     } = BACKGROUND_METADATA;
 
-    let mut tile_storage = TileStorage::empty(size);
+    let mut tile_storage = ChunkStorage::empty(size);
 
     fill_tilemap(
         TileTextureIndex(0),
@@ -74,7 +74,7 @@ fn create_animated_flowers(mut commands: Commands, asset_server: Res<AssetServer
         tile_size,
     } = FLOWERS_METADATA;
 
-    let mut tile_storage = TileStorage::empty(map_size);
+    let mut tile_storage = ChunkStorage::empty(map_size);
 
     let tilemap_entity = commands.spawn_empty().id();
 

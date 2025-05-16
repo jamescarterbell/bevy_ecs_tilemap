@@ -224,7 +224,7 @@ fn spawn_chunks(mut commands: Commands, tile_handle_hex_row: Res<TileHandleHexRo
                 y: chunk_y,
             });
 
-            let mut tile_storage = TileStorage::empty(map_size);
+            let mut tile_storage = ChunkStorage::empty(map_size);
             let tilemap_entity = commands.spawn_empty().id();
             let tilemap_id = TilemapId(tilemap_entity);
 
@@ -263,7 +263,7 @@ fn swap_map_type(
         &mut TilemapGridSize,
         &mut TilemapTexture,
         &mut TilemapTileSize,
-        &TileStorage,
+        &ChunkStorage<Entity>,
         &ChunkPos,
         &TilemapAnchor,
     )>,
@@ -315,8 +315,8 @@ fn swap_map_type(
                 if let Ok((mut tile_label_transform, mut tile_label_text)) =
                     transform_q.get_mut(label.0)
                 {
-                    if let Some(ent) = tile_storage.checked_get(tile_pos) {
-                        if ent == tile_entity {
+                    if let Ok(Some(ent)) = tile_storage.try_get(tile_pos) {
+                        if *ent == tile_entity {
                             let tile_center = tile_pos
                                 .center_in_world(
                                     &map_size, &grid_size, &tile_size, &map_type, anchor,
@@ -355,7 +355,7 @@ fn spawn_tile_labels(
         &TilemapSize,
         &TilemapGridSize,
         &TilemapTileSize,
-        &TileStorage,
+        &ChunkStorage<Entity>,
         &TilemapAnchor,
     )>,
     tile_q: Query<&TilePos>,
@@ -439,7 +439,7 @@ fn hover_highlight_tile_label(
         &TilemapTileSize,
         &TilemapType,
         &TilemapAnchor,
-        &TileStorage,
+        &ChunkStorage<Entity>,
         &Transform,
     )>,
     highlighted_tiles_q: Query<Entity, With<Hovered>>,
@@ -475,11 +475,11 @@ fn hover_highlight_tile_label(
             anchor,
         ) {
             if let Some(tile_entity) = tile_storage.get(&tile_pos) {
-                if let Ok(label) = tile_label_q.get(tile_entity) {
+                if let Ok(label) = tile_label_q.get(*tile_entity) {
                     if let Ok((mut text_color, mut text_font)) = text_q.get_mut(label.0) {
                         text_color.0 = palettes::tailwind::RED_600.into();
                         text_font.font_size = DEFAULT_FONT_SIZE;
-                        commands.entity(tile_entity).insert(Hovered);
+                        commands.entity(*tile_entity).insert(Hovered);
                     }
                 }
             }
@@ -515,7 +515,7 @@ fn highlight_neighbor_labels(
         &TilemapSize,
         &TilemapGridSize,
         &TilemapTileSize,
-        &TileStorage,
+        &ChunkStorage<Entity>,
         &Transform,
         &TilemapAnchor,
     )>,
@@ -544,8 +544,8 @@ fn highlight_neighbor_labels(
         tilemap_query.iter()
     {
         for (hovered_tile_entity, hovered_tile_pos) in hovered_tiles_q.iter() {
-            if let Some(ent) = tile_storage.checked_get(hovered_tile_pos) {
-                if ent == hovered_tile_entity {
+            if let Ok(Some(ent)) = tile_storage.try_get(hovered_tile_pos) {
+                if *ent == hovered_tile_entity {
                     neighbors = Some(hex_neighbors_radius_from_tile_pos(
                         hovered_tile_pos,
                         map_size,

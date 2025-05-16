@@ -25,7 +25,7 @@ use extract::remove_changed;
 
 use crate::{
     TilemapFirstSet,
-    tiles::{TilePos, TileStorage},
+    tiles::{ChunkStorage, TilePos},
 };
 use crate::{
     prelude::TilemapTexture,
@@ -314,7 +314,7 @@ fn on_remove_tile(
 }
 
 fn on_remove_tilemap(
-    trigger: Trigger<OnRemove, TileStorage>,
+    trigger: Trigger<OnRemove, ChunkStorage<Entity>>,
     mut commands: Commands,
     query: Query<&RenderEntity>,
 ) {

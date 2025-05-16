@@ -27,7 +27,7 @@ fn startup(
     // This component is a grid of tile entities and is used to help keep track of individual
     // tiles in the world. If you have multiple layers of tiles you would have a tilemap entity
     // per layer, each with their own `TileStorage` component.
-    let mut tile_storage = TileStorage::empty(map_size);
+    let mut tile_storage = ChunkStorage::empty(map_size);
 
     // Spawn the elements of the tilemap.
     // Alternatively, you can use helpers::filling::fill_tilemap.

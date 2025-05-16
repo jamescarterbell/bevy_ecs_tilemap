@@ -10,7 +10,7 @@ fn startup(mut commands: Commands, asset_server: Res<AssetServer>) {
     let texture_handle: Handle<Image> = asset_server.load("tiles.png");
 
     let map_size = TilemapSize { x: 32, y: 32 };
-    let mut tile_storage = TileStorage::empty(map_size);
+    let mut tile_storage = ChunkStorage::empty(map_size);
     let tilemap_entity = commands.spawn_empty().id();
 
     for x in 0..32u32 {
@@ -54,7 +54,7 @@ struct LastUpdate {
 fn remove_tiles(
     mut commands: Commands,
     time: Res<Time>,
-    mut last_update_query: Query<(&mut LastUpdate, &mut TileStorage)>,
+    mut last_update_query: Query<(&mut LastUpdate, &mut ChunkStorage<Entity>)>,
 ) {
     let current_time = time.elapsed_secs_f64();
     for (mut last_update, mut tile_storage) in last_update_query.iter_mut() {
@@ -67,7 +67,7 @@ fn remove_tiles(
             };
 
             if let Some(tile_entity) = tile_storage.get(&position) {
-                commands.entity(tile_entity).despawn();
+                commands.entity(*tile_entity).despawn();
                 // Don't forget to remove tiles from the tile storage!
                 tile_storage.remove(&position);
             }

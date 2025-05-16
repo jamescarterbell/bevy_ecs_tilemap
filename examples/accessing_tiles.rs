@@ -22,7 +22,7 @@ fn startup(mut commands: Commands, asset_server: Res<AssetServer>) {
     // This component is a grid of tile entities and is used to help keep track of individual
     // tiles in the world. If you have multiple layers of tiles you would have a Tilemap2dStorage
     // component per layer.
-    let mut tile_storage = TileStorage::empty(map_size);
+    let mut tile_storage = ChunkStorage::empty(map_size);
 
     // For the purposes of this example, we consider a tilemap with rectangular tiles.
     let map_type = TilemapType::Square;
@@ -70,7 +70,7 @@ fn startup(mut commands: Commands, asset_server: Res<AssetServer>) {
             for pos in neighbors.iter() {
                 // We can replace the tile texture component like so:
                 commands
-                    .entity(tile_storage.get(pos).unwrap())
+                    .entity(*tile_storage.get(pos).unwrap())
                     .insert(TileTextureIndex(color));
             }
         }
@@ -104,7 +104,7 @@ fn update_map(
     mut tilemap_query: Query<(
         &mut CurrentColor,
         &mut LastUpdate,
-        &TileStorage,
+        &ChunkStorage<Entity>,
         &TilemapSize,
     )>,
     mut tile_query: Query<&mut TileTextureIndex>,

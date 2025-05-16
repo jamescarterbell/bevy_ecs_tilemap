@@ -44,7 +44,7 @@ fn spawn_tilemap(mut commands: Commands, tile_handle_hex_row: Res<TileHandleHexR
         y: MAP_SIDE_LENGTH,
     };
 
-    let mut tile_storage = TileStorage::empty(map_size);
+    let mut tile_storage = ChunkStorage::empty(map_size);
     let tilemap_entity = commands.spawn_empty().id();
     let tilemap_id = TilemapId(tilemap_entity);
 
@@ -121,7 +121,7 @@ fn swap_map_type(
         &mut TilemapGridSize,
         &mut TilemapTexture,
         &mut TilemapTileSize,
-        &mut TileStorage,
+        &mut ChunkStorage<Entity>,
     )>,
     keyboard_input: Res<ButtonInput<KeyCode>>,
     mut map_type_label_q: Query<&mut Text2d, With<MapTypeLabel>>,

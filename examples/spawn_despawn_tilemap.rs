@@ -20,7 +20,7 @@ fn startup(mut commands: Commands) {
 fn spawn_map(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    maps: Query<(), With<TileStorage>>,
+    maps: Query<(), With<ChunkStorage<Entity>>>,
 ) {
     let num_maps = maps.iter().len();
 
@@ -30,7 +30,7 @@ fn spawn_map(
 
     let tilemap_entity = commands.spawn_empty().id();
 
-    let mut tile_storage = TileStorage::empty(map_size);
+    let mut tile_storage = ChunkStorage::empty(map_size);
 
     // Spawn the elements of the tilemap.
     // Alternatively, you can use helpers::filling::fill_tilemap.
@@ -73,7 +73,10 @@ fn spawn_map(
     });
 }
 
-fn despawn_map(mut commands: Commands, mut maps: Query<(Entity, &mut TileStorage, &Transform)>) {
+fn despawn_map(
+    mut commands: Commands,
+    mut maps: Query<(Entity, &mut ChunkStorage<Entity>, &Transform)>,
+) {
     let Some((tilemap_entity, mut tile_storage, _)) = maps
         .iter_mut()
         .sort_by::<&Transform>(|a, b| b.translation.z.partial_cmp(&a.translation.z).unwrap())

@@ -69,7 +69,7 @@ fn spawn_tilemap(mut commands: Commands, tile_handle_square: Res<TileHandleSquar
         y: MAP_SIDE_LENGTH_Y,
     };
 
-    let mut tile_storage = TileStorage::empty(map_size);
+    let mut tile_storage = ChunkStorage::empty(map_size);
     let tilemap_entity = commands.spawn_empty().id();
     let tilemap_id = TilemapId(tilemap_entity);
 
@@ -108,7 +108,7 @@ fn spawn_tile_labels(
         &TilemapType,
         &TilemapGridSize,
         &TilemapTileSize,
-        &TileStorage,
+        &ChunkStorage<Entity>,
         &TilemapSize,
         &TilemapAnchor,
     )>,
@@ -312,7 +312,7 @@ fn highlight_tile_labels(
         &TilemapGridSize,
         &TilemapTileSize,
         &TilemapType,
-        &TileStorage,
+        &ChunkStorage<Entity>,
         &Transform,
         &TilemapAnchor,
     )>,
@@ -356,10 +356,10 @@ fn highlight_tile_labels(
         ) {
             // Highlight the relevant tile's label
             if let Some(tile_entity) = tile_storage.get(&tile_pos) {
-                if let Ok(label) = tile_label_q.get(tile_entity) {
+                if let Ok(label) = tile_label_q.get(*tile_entity) {
                     if let Ok(mut text_color) = text_q.get_mut(label.0) {
                         text_color.0 = palettes::tailwind::RED_600.into();
-                        commands.entity(tile_entity).insert(HighlightedLabel);
+                        commands.entity(*tile_entity).insert(HighlightedLabel);
                     }
                 }
             }

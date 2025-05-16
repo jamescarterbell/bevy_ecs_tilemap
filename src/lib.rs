@@ -16,7 +16,7 @@
 //! - Can `Anchor` tilemap like a sprite.
 
 use bevy::{
-    ecs::schedule::IntoScheduleConfigs,
+    ecs::{entity::Entity, schedule::IntoScheduleConfigs},
     prelude::{
         Bundle, Changed, Component, Deref, First, GlobalTransform, InheritedVisibility, Plugin,
         Query, Reflect, ReflectComponent, SystemSet, Transform, ViewVisibility, Visibility,
@@ -37,7 +37,7 @@ use prelude::{TilemapId, TilemapRenderSettings};
 #[cfg(feature = "render")]
 use render::material::{MaterialTilemap, StandardTilemapMaterial};
 use tiles::{
-    AnimatedTile, TileColor, TileFlip, TilePos, TilePosOld, TileStorage, TileTextureIndex,
+    AnimatedTile, ChunkStorage, TileColor, TileFlip, TilePos, TilePosOld, TileTextureIndex,
     TileVisible,
 };
 
@@ -56,6 +56,8 @@ pub mod map;
 pub(crate) mod render;
 /// A module which contains tile components.
 pub mod tiles;
+
+pub mod err;
 
 /// A bevy tilemap plugin. This must be included in order for everything to be rendered.
 /// But is not necessary if you are running without a renderer.
@@ -90,7 +92,7 @@ impl Plugin for TilemapPlugin {
             .register_type::<TileColor>()
             .register_type::<TileVisible>()
             .register_type::<TileFlip>()
-            .register_type::<TileStorage>()
+            .register_type::<ChunkStorage<Entity>>()
             .register_type::<TilePosOld>()
             .register_type::<AnimatedTile>()
             .configure_sets(First, TilemapFirstSet.after(TimeSystem));
@@ -116,13 +118,13 @@ pub type TilemapBundle = MaterialTilemapBundle<StandardTilemapMaterial>;
 
 #[cfg(feature = "render")]
 /// The default tilemap bundle. All of the components within are required.
-#[derive(Bundle, Debug, Default, Clone)]
+#[derive(Bundle, Default, Debug, Clone)]
 pub struct MaterialTilemapBundle<M: MaterialTilemap> {
     pub grid_size: TilemapGridSize,
     pub map_type: TilemapType,
     pub size: TilemapSize,
     pub spacing: TilemapSpacing,
-    pub storage: TileStorage,
+    pub storage: ChunkStorage<Entity>,
     pub texture: TilemapTexture,
     pub tile_size: TilemapTileSize,
     pub transform: Transform,
@@ -149,7 +151,7 @@ pub struct StandardTilemapBundle {
     pub map_type: TilemapType,
     pub size: TilemapSize,
     pub spacing: TilemapSpacing,
-    pub storage: TileStorage,
+    pub storage: ChunkStorage,
     pub texture: TilemapTexture,
     pub tile_size: TilemapTileSize,
     pub transform: Transform,

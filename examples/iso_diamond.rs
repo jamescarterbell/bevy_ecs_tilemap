@@ -21,7 +21,7 @@ fn startup(mut commands: Commands, asset_server: Res<AssetServer>) {
         x: QUADRANT_SIDE_LENGTH,
         y: QUADRANT_SIDE_LENGTH,
     };
-    let mut tile_storage = TileStorage::empty(map_size);
+    let mut tile_storage = ChunkStorage::empty(map_size);
     let tilemap_entity = commands.spawn_empty().id();
     let tilemap_id = TilemapId(tilemap_entity);
 

@@ -50,7 +50,7 @@ fn spawn_scene(mut commands: Commands, texture_handles: Res<TextureHandles>) {
         y: MAP_SIDE_LENGTH_Y,
     };
 
-    let mut tile_storage = TileStorage::empty(map_size);
+    let mut tile_storage = ChunkStorage::empty(map_size);
     let tilemap_entity = commands.spawn_empty().id();
 
     fill_tilemap(

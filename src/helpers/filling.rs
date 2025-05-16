@@ -3,8 +3,9 @@ use crate::helpers::hex_grid::neighbors::{HEX_DIRECTIONS, HexDirection};
 use crate::map::TilemapId;
 use crate::prelude::HexCoordSystem;
 use crate::tiles::{TileBundle, TileColor, TilePos, TileTextureIndex};
-use crate::{TileStorage, TilemapSize};
+use crate::{ChunkStorage, TilemapSize};
 
+use bevy::ecs::entity::Entity;
 use bevy::prelude::{Color, Commands};
 
 /// Fills an entire tile storage with the given tile.
@@ -13,7 +14,7 @@ pub fn fill_tilemap(
     size: TilemapSize,
     tilemap_id: TilemapId,
     commands: &mut Commands,
-    tile_storage: &mut TileStorage,
+    tile_storage: &mut ChunkStorage<Entity>,
 ) {
     commands.entity(tilemap_id.0).with_children(|parent| {
         for x in 0..size.x {
@@ -43,7 +44,7 @@ pub fn fill_tilemap_rect(
     size: TilemapSize,
     tilemap_id: TilemapId,
     commands: &mut Commands,
-    tile_storage: &mut TileStorage,
+    tile_storage: &mut ChunkStorage<Entity>,
 ) {
     commands.entity(tilemap_id.0).with_children(|parent| {
         for x in 0..size.x {
@@ -78,7 +79,7 @@ pub fn fill_tilemap_rect_color(
     color: Color,
     tilemap_id: TilemapId,
     commands: &mut Commands,
-    tile_storage: &mut TileStorage,
+    tile_storage: &mut ChunkStorage<Entity>,
 ) {
     commands.entity(tilemap_id.0).with_children(|parent| {
         for x in 0..size.x {
@@ -154,7 +155,7 @@ pub fn fill_tilemap_hexagon(
     hex_coord_system: HexCoordSystem,
     tilemap_id: TilemapId,
     commands: &mut Commands,
-    tile_storage: &mut TileStorage,
+    tile_storage: &mut ChunkStorage<Entity>,
 ) {
     let tile_positions = generate_hexagon(
         AxialPos::from_tile_pos_given_coord_system(&origin, hex_coord_system),
@@ -174,7 +175,7 @@ pub fn fill_tilemap_hexagon(
                     ..Default::default()
                 })
                 .id();
-            tile_storage.checked_set(&tile_pos, tile_entity)
+            tile_storage.try_set(&tile_pos, tile_entity);
         }
     });
 }

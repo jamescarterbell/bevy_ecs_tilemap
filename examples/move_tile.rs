@@ -12,7 +12,7 @@ fn startup(mut commands: Commands, asset_server: Res<AssetServer>) {
     // Create a tilemap entity a little early.
     let tilemap_entity = commands.spawn_empty().id();
 
-    let mut tile_storage = TileStorage::empty(map_size);
+    let mut tile_storage = ChunkStorage::empty(map_size);
 
     // Spawn the elements of the tilemap.
 
